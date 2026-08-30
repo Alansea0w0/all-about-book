@@ -115,10 +115,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return
     }
 
+    const client = supabase
     let ignore = false
     const loadSession = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession()
+        const { data, error } = await client.auth.getSession()
         if (ignore) return
 
         if (error) {
@@ -144,7 +145,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     loadSession()
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
+    const { data: listener } = client.auth.onAuthStateChange(
       (_event, nextSession) => {
         if (ignore) return
         setSession(nextSession)
