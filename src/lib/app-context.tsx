@@ -7,7 +7,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import type { EmailOtpType, Session, User } from '@supabase/supabase-js'
+import type { Session, User } from '@supabase/supabase-js'
 import type { Book } from '../types/book'
 import type { DiscussionMessage } from '../types/discussion'
 import type { Excerpt } from '../types/excerpt'
@@ -42,12 +42,33 @@ type AppContextValue = {
 }
 
 const DATA_SOURCE_KEY = 'all-about-book:data-source'
-const AUTH_RETURN_URL = 'https://chuan-101.github.io/all-about-book/#/'
+const AUTH_CALLBACK_PARAMS = [
+  'code',
+  'token_hash',
+  'type',
+  'error',
+  'error_code',
+  'error_description',
+  'sb_flow_id',
+]
 
-const getHashParams = (hash: string): URLSearchParams => {
-  const queryIndex = hash.indexOf('?')
-  if (queryIndex === -1) return new URLSearchParams()
-  return new URLSearchParams(hash.slice(queryIndex + 1))
+const clearAuthCallbackUrl = () => {
+  if (typeof window === 'undefined') return
+
+  const url = new URL(window.location.href)
+  const hasAuthCallbackParams = AUTH_CALLBACK_PARAMS.some((param) =>
+    url.searchParams.has(param),
+  )
+  if (!hasAuthCallbackParams) return
+
+  const cleanUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
+  cleanUrl.hash = '/'
+
+  try {
+    window.history.replaceState({}, document.title, cleanUrl.toString())
+  } catch {
+    // URL cleanup must never invalidate an already restored session.
+  }
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined)
@@ -96,44 +117,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     let ignore = false
     const loadSession = async () => {
-      let callbackError: unknown = null
       try {
-        if (typeof window !== 'undefined') {
-          const url = new URL(window.location.href)
-          const hashParams = getHashParams(url.hash)
-          const code = url.searchParams.get('code') ?? hashParams.get('code')
-          const tokenHash = hashParams.get('token_hash')
-          const type = hashParams.get('type')
-          const hasCallbackParams = Boolean(
-            code ||
-              tokenHash ||
-              type ||
-              url.searchParams.get('token_hash') ||
-              url.searchParams.get('type'),
-          )
-
-          if (hasCallbackParams) {
-            try {
-              if (code) {
-                const { error } = await supabase!.auth.exchangeCodeForSession(code)
-                if (error) throw error
-              } else if (tokenHash && type) {
-                const { error } = await supabase!.auth.verifyOtp({
-                  type: type as EmailOtpType,
-                  token_hash: tokenHash,
-                })
-                if (error) throw error
-              }
-            } catch (error) {
-              callbackError = error
-            } finally {
-              window.history.replaceState({}, document.title, AUTH_RETURN_URL)
-            }
-          }
-        }
-
-        const { data, error } = await supabase!.auth.getSession()
+        const { data, error } = await supabase.auth.getSession()
         if (ignore) return
+
         if (error) {
           setAuthWarning('无法读取登录信息，将继续使用本地数据。')
           setSession(null)
@@ -141,32 +128,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
         } else {
           setSession(data.session)
           setUser(data.session?.user ?? null)
-          if (callbackError && !data.session) {
-            setAuthWarning('无法完成登录回调，将继续使用本地数据。')
-          }
+          setAuthWarning(null)
         }
-      } catch (error) {
+      } catch {
         if (!ignore) {
-          if (callbackError) {
-            setAuthWarning('无法完成登录回调，将继续使用本地数据。')
-          } else {
-            setAuthWarning('无法读取登录信息，将继续使用本地数据。')
-          }
+          setAuthWarning('无法读取登录信息，将继续使用本地数据。')
           setSession(null)
           setUser(null)
         }
       } finally {
+        clearAuthCallbackUrl()
         if (!ignore) setAuthLoading(false)
       }
     }
 
     loadSession()
 
-    const { data: listener } = supabase!.auth.onAuthStateChange(
+    const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, nextSession) => {
         if (ignore) return
         setSession(nextSession)
         setUser(nextSession?.user ?? null)
+        if (nextSession) setAuthWarning(null)
       },
     )
 
