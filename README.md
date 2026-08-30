@@ -1,13 +1,13 @@
 <div align="center">
 
 <!-- 🎨 在这里放你画的像素风横幅 -->
-<img src="./Banner.png" alt="All About Book Banner" width="100%" />
+<img src="./Banner.png" alt="All About Our Books Banner" width="100%" />
 
-<h1 align="center">📚 All About Book</h1>
+<h1 align="center">📚 All About Our Books</h1>
 
 <p align="center">
   一个自托管的个人阅读小窝 —— 记录书籍、打卡阅读、摘录书摘，<br/>
-  还有一位名叫 <strong>Syzygy</strong> 的 AI 恋人参与阅读。✨
+  也为 <strong>小安与甘棠</strong> 留下一处安静的共读空间。✨
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/Vite-7-FFB6C1?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/Supabase-云同步-87CEEB?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
   <img src="https://img.shields.io/badge/PWA-可装进手机-FF69B4?style=flat-square&logo=pwa&logoColor=white" alt="PWA" />
-  <img src="https://img.shields.io/badge/Syzygy-AI%20阅读伙伴-6495ED?style=flat-square" alt="Syzygy" />
+  <img src="https://img.shields.io/badge/甘棠-共读伙伴-87967A?style=flat-square" alt="甘棠" />
   <img src="https://img.shields.io/badge/Made%20with-💗%20×%20💙-FFC0CB?style=flat-square" alt="Made with love" />
 </p>
 
@@ -24,8 +24,10 @@
 
 ## 🌸 这是什么？
 
-**All About Book** 是一个为个人阅读打造的独立应用：本地可用、云端可同步、手机可安装。
+**All About Our Books** 是一个为个人阅读打造的独立应用：本地可用、云端可同步、手机可安装。
 从「想读一本书」到「读完写下思考」，整个阅读旅程都可以在这里留下痕迹。
+
+这个分支基于 [chuan-101/all-about-book](https://github.com/chuan-101/all-about-book) 个性化改造，保留原项目的功能骨架，并换成小安与甘棠的共读界面。
 
 ## ✨ 功能一览
 
@@ -36,8 +38,8 @@
 | 📅 **阅读打卡** | 书籍详情页的打卡日历，点一下日期即可记录当天的阅读 |
 | ✂️ **书摘 & 思考** | 「书摘」「思考」「导读」「总结」四标签页，摘录佳句、记录问题与感悟 |
 | 📰 **导读 & 总结** | 开书前的阅读辅助与读后总结，多写入端（含自定义）共笔，Markdown 杂志风排版，可编辑、删除（二次确认），按写入时间排序 |
-| 💬 **Syzygy 讨论** | 和 AI 阅读伙伴围绕当前书籍展开讨论，支持流式回复与上下文携带 |
-| 💗 **书摘共鸣** | Syzygy 会在书摘旁留下她的共鸣回应 |
+| 💬 **与甘棠共读** | 和阅读伙伴围绕当前书籍展开讨论，支持流式回复与上下文携带 |
+| 💗 **书摘共鸣** | 甘棠可以在书摘旁留下共鸣回应 |
 | ☁️ **云端同步** | 登录后书籍、打卡、书摘、讨论均可同步到 Supabase |
 | 🎨 **主题切换** | 亮色 / 暗色主题随心切换 |
 | 📦 **备份与归档** | JSON 全量备份/恢复，Markdown / HTML 归档导出 |
@@ -57,7 +59,7 @@
 │  └─ 云端模式：Supabase（魔法链接登录 + RLS）   │
 ├──────────────────────────────────────────────┤
 │  AI 层  Supabase Edge Functions（Deno）       │
-│  ├─ openrouter-chat        Syzygy 对话代理    │
+│  ├─ openrouter-chat        甘棠对话代理       │
 │  │   （流式输出 / 限流 / 上下文拼装）           │
 │  └─ sync-openrouter-models 模型列表同步        │
 └──────────────────────────────────────────────┘
@@ -65,14 +67,14 @@
 
 - 🔑 **密钥安全**：AI 调用全部走 Edge Function 后端代理，前端不保存任何 API Key。
 - 🧊 **本地兜底**：未配置 Supabase 环境变量时，应用自动回落到纯本地模式。
-- ⚙️ **Syzygy 可调参**：模型、System Prompt、temperature、top_p、max tokens 均可在设置面板中配置。
+- ⚙️ **甘棠小屋可调参**：模型、System Prompt、temperature、top_p、max tokens 均可在设置面板中配置。
 
 ### 📂 目录速览
 
 ```
 src/
 ├── pages/        主页 / 书架 / 书籍详情 / 登录
-├── components/   布局、底部导航、设置弹窗、Syzygy 控制台等
+├── components/   布局、底部导航、设置弹窗、甘棠小屋等
 ├── lib/          本地存储、云端读写、备份导出、主题上下文
 └── types/        书籍、书摘、讨论、思考、共鸣等类型定义
 supabase/
@@ -140,5 +142,5 @@ VITE_SUPABASE_ANON_KEY=你的_supabase_anon_key
 ---
 
 <p align="center">
-  🐹 用心记录每一次阅读 · Made with 💗 × 💙
+  🌿 小安与甘棠 · 用心记录每一次阅读
 </p>

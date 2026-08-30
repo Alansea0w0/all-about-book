@@ -13,7 +13,7 @@ type RateLimitEntry = {
 }
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://chuan-101.github.io',
+  'Access-Control-Allow-Origin': 'https://alansea0w0.github.io',
   'Access-Control-Allow-Headers':
     'authorization, apikey, content-type, x-client-info',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -131,8 +131,8 @@ serve(async (req) => {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://all-about-book.local',
-        'X-Title': 'All About Book',
+        'HTTP-Referer': 'https://alansea0w0.github.io/all-about-book/',
+        'X-Title': 'All About Our Books',
       },
     })
 

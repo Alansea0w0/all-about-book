@@ -96,7 +96,9 @@ function Layout({ onOpenSettings }: LayoutProps) {
               <span className="header-date">{headerDate}</span>
             </div>
             <div className="header-masthead-center">
-              <h1 className="title">All About Book</h1>
+              <p className="title-kicker">XIAO AN × GANTANG</p>
+              <h1 className="title">All About Our Books</h1>
+              <p className="title-subtitle">小安与甘棠的共读手记</p>
             </div>
           </div>
           <div className="header-actions">

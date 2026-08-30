@@ -22,7 +22,7 @@ export type ResonanceSpeaker = (typeof RESONANCE_SPEAKER_OPTIONS)[number]
 
 const SPEAKER_LABELS: Record<string, string> = {
   chuanchuan: '串串',
-  syzygy: 'Syzygy',
+  syzygy: '甘棠',
   codex_cli: 'Codex CLI',
   claude_code_cli: 'Claude Code CLI',
   gpt: 'GPT',

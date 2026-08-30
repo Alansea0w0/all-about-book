@@ -210,7 +210,7 @@ function SyzygyConsole({ isOpen: controlledOpen, onOpenChange }: SyzygyConsolePr
       if (isMissingTableError(error)) {
         setSettingsError(MISSING_TABLE_MESSAGE)
       } else {
-        setSettingsError('无法加载 Syzygy 设置，请稍后重试。')
+        setSettingsError('无法加载甘棠的设置，请稍后重试。')
       }
       setDraft(buildDraftFromDefaults())
     }
@@ -375,11 +375,11 @@ function SyzygyConsole({ isOpen: controlledOpen, onOpenChange }: SyzygyConsolePr
     <>
       <button
         type="button"
-        className="button ghost top-nav-button"
+        className="button ghost top-nav-button companion-console-trigger"
         onClick={() => setIsOpen(true)}
         aria-haspopup="dialog"
       >
-        ⚙ Syzygy Console
+        ⚙ 甘棠小屋
       </button>
       {isOpen ? (
         <div
@@ -390,10 +390,10 @@ function SyzygyConsole({ isOpen: controlledOpen, onOpenChange }: SyzygyConsolePr
           <div className="excerpt-modal">
             <div className="excerpt-modal-header">
               <div>
-                <h4>Syzygy Console</h4>
+                <h4>甘棠小屋</h4>
                 <p className="muted">
-                  设置系统提示词、模型与采样参数。保存后应用到
-                  “Ask Syzygy”。
+                  设置模型、提示词与回复参数。保存后会应用到
+                  “问问甘棠”。
                 </p>
               </div>
               <button
@@ -535,7 +535,7 @@ function SyzygyConsole({ isOpen: controlledOpen, onOpenChange }: SyzygyConsolePr
                         systemPrompt: event.target.value,
                       }))
                     }
-                    placeholder="输入 Syzygy 系统提示词（可留空使用默认值）"
+                    placeholder="输入甘棠的系统提示词（可留空使用默认值）"
                   />
                 </label>
               </div>

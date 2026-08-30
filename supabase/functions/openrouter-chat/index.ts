@@ -15,15 +15,15 @@ type RateLimitEntry = {
 }
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://chuan-101.github.io',
+  'Access-Control-Allow-Origin': 'https://alansea0w0.github.io',
   'Access-Control-Allow-Headers':
     'authorization, apikey, content-type, x-client-info',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const DEFAULT_MODEL = 'openai/gpt-4o-mini'
+const DEFAULT_MODEL = 'openai/gpt-5.6-sol'
 const DEFAULT_SYSTEM_PROMPT =
-  'You are Syzygy, a thoughtful reading companion. Offer concise, friendly insights and questions to deepen understanding.'
+  'You are Gantang (甘棠), a thoughtful reading companion. Offer warm, concise insights and questions that deepen understanding while respecting the reader’s own interpretation.'
 const DEFAULT_TEMPERATURE = 0.7
 const DEFAULT_TOP_P = 0.9
 const DEFAULT_MAX_TOKENS = 2000
@@ -485,8 +485,8 @@ serve(async (req) => {
         headers: {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://all-about-book.local',
-          'X-Title': 'All About Book',
+          'HTTP-Referer': 'https://alansea0w0.github.io/all-about-book/',
+          'X-Title': 'All About Our Books',
         },
         body: JSON.stringify({
           model,

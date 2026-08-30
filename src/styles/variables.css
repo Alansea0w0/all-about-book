@@ -9,33 +9,33 @@
   /* === Palette: Vintage Scrapbook === */
 
   /* Background: Warm, aged paper (Cream/Beige) */
-  --color-bg-main: #f4f1ea;
-  --color-bg-card: #fdfcf8;
-  --color-bg-input: #e8e4d9;
+  --color-bg-main: #f3efe6;
+  --color-bg-card: #fffdf8;
+  --color-bg-input: #eae6dc;
 
   /* Text: Soft Charcoal & Deep Green (No pure black!) */
-  --color-text-primary: #2c2825;
-  --color-text-secondary: #5c5550;
-  --color-text-muted: #8a817a;
+  --color-text-primary: #302d28;
+  --color-text-secondary: #655f56;
+  --color-text-muted: #91887b;
 
   /* Borders & Accents: The Soul of the theme */
   /* Primary Accent: Deep Moss Green (墨绿) */
-  --color-accent-primary: #7e8d6c;
-  --color-accent-hover: #2d4a38;
+  --color-accent-primary: #87967a;
+  --color-accent-hover: #405443;
 
   /* Secondary Accent: Vintage Brick Red (for tapes/stamps) */
-  --color-accent-secondary: #c85a48;
+  --color-accent-secondary: #b87868;
 
   /* Borders: Deep Green instead of black */
-  --color-border: #7e8d6c;
+  --color-border: #96a189;
   --dropdown-border: 2px solid var(--color-border);
   --separator-groove: none;
 
   /* Visuals */
   --border-radius-card: 2px;
   --border-radius-btn: 4px;
-  --box-shadow-card: 2px 3px 5px rgba(58, 95, 72, 0.15),
-    1px 1px 0px rgba(0, 0, 0, 0.05);
+  --box-shadow-card: 0 8px 22px rgba(64, 84, 67, 0.09),
+    1px 1px 0px rgba(48, 45, 40, 0.04);
   --box-shadow-btn: 0px 4px 0px var(--color-text-primary);
 
   /* Texture: Subtle Grain/Noise */
@@ -43,10 +43,10 @@
   --font-family-base: 'Noto Serif SC', serif;
 
   /* Contribution Graph Colors (Coffee/Matcha stains) */
-  --color-graph-l1: #e4d8bf;
-  --color-graph-l2: #cdbca3;
-  --color-graph-l3: #a8937c;
-  --color-graph-l4: #5c5550;
+  --color-graph-l1: #e1e6db;
+  --color-graph-l2: #c8d2bd;
+  --color-graph-l3: #9daf90;
+  --color-graph-l4: #667a5e;
 
   --color-status-reading: var(--color-accent-primary);
   --color-status-reading-bg: rgba(58, 95, 72, 0.15);

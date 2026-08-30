@@ -49,9 +49,9 @@ create policy "openrouter_models_manage"
 
 insert into public.openrouter_models (id, label, enabled, sort_order)
 values
-  ('openai/gpt-4o-mini', 'GPT-4o Mini', true, 0),
-  ('openai/gpt-4o', 'GPT-4o', true, 1),
-  ('anthropic/claude-3.5-sonnet', 'Claude 3.5 Sonnet', true, 2)
+  ('openai/gpt-5.6-sol', 'GPT-5.6 Sol', true, 0),
+  ('anthropic/claude-sonnet-4.6', 'Claude Sonnet 4.6', true, 1),
+  ('anthropic/claude-opus-4.6', 'Claude Opus 4.6', true, 2)
 on conflict (id) do update
 set
   label = excluded.label,

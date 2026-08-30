@@ -25,8 +25,8 @@ export type CompanionWriter = (typeof COMPANION_WRITER_OPTIONS)[number]
 
 const COMPANION_WRITER_LABELS: Record<string, string> = {
   chuanchuan: '串串',
-  'syzygy-claude': 'Syzygy(Claude)',
-  'syzygy-gpt': 'Syzygy(GPT)',
+  'syzygy-claude': '甘棠（Claude）',
+  'syzygy-gpt': '甘棠（GPT）',
   cli_reading_assist: 'CLI 阅读助手',
 }
 

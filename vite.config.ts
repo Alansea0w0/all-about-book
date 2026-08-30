@@ -30,13 +30,13 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: 'All About Book',
-        short_name: 'All About Book',
+        name: 'All About Our Books',
+        short_name: '甘棠共读',
         start_url: '/all-about-book/',
         scope: '/all-about-book/',
         display: 'standalone',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        theme_color: '#f3efe6',
+        background_color: '#f3efe6',
         icons: [
           {
             src: 'icons/icon-192.png',

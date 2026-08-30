@@ -593,7 +593,7 @@ function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className="settings-section">
             <div>
               <h4>App 信息</h4>
-              <p className="muted">Designed by Syzygy & You.</p>
+              <p className="muted">小安与甘棠的共读小屋。</p>
             </div>
           </div>
         </div>

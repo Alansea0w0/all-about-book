@@ -576,7 +576,7 @@ function BookDetailPage() {
         setResonancesByExcerpt(grouped)
       } catch (error) {
         console.error('Failed to load excerpt resonances', error)
-        setCloudError('Syzygy 留言加载失败，请稍后重试。')
+        setCloudError('甘棠留言加载失败，请稍后重试。')
       }
     },
     [session],
@@ -1432,15 +1432,15 @@ function BookDetailPage() {
     }
     const content = newMessageContent.trim()
     if (!content) {
-      setCloudError('请先输入内容再让 Syzygy 回复。')
+      setCloudError('请先输入内容再让甘棠回复。')
       return
     }
     if (!isCloudMode) {
-      setCloudError('请先切换到云端模式后再使用 Syzygy。')
+      setCloudError('请先切换到云端模式后再问问甘棠。')
       return
     }
     if (!session?.user || !supabase) {
-      setCloudError('请先登录后再让 Syzygy 回复。')
+      setCloudError('请先登录后再让甘棠回复。')
       return
     }
     if (!supabaseAnonKey) {
@@ -1462,7 +1462,7 @@ function BookDetailPage() {
     try {
       const accessToken = session.access_token
       if (!accessToken) {
-        setCloudError('请先登录后再让 Syzygy 回复。')
+        setCloudError('请先登录后再让甘棠回复。')
         setIsAskingSyzygy(false)
         return
       }
@@ -1645,10 +1645,10 @@ function BookDetailPage() {
           ? (error as { status?: number }).status
           : undefined
       if (status === 401 || status === 403) {
-        setCloudError('请先登录后再让 Syzygy 回复。')
+        setCloudError('请先登录后再让甘棠回复。')
         return
       }
-      setCloudError('Syzygy 回复失败，请稍后再试。')
+      setCloudError('甘棠回复失败，请稍后再试。')
     } finally {
       setIsAskingSyzygy(false)
       setIsStreamingReply(false)
@@ -1835,7 +1835,7 @@ function BookDetailPage() {
     const content = resonanceDraft.trim()
     if (!content) return
     if (!session?.user) {
-      setCloudError('请先登录后再新增 Syzygy 留言。')
+      setCloudError('请先登录后再新增甘棠留言。')
       return
     }
     setCloudError(null)
@@ -1855,7 +1855,7 @@ function BookDetailPage() {
       }
     } catch (error) {
       console.error(error)
-      setCloudError('Syzygy 留言保存失败，请稍后重试。')
+      setCloudError('甘棠留言保存失败，请稍后重试。')
     } finally {
       setIsSavingResonance(false)
     }
@@ -2338,7 +2338,7 @@ function BookDetailPage() {
               ? '取消'
               : resonances.length > 0
                 ? '+ 添加旁批'
-                : '+ 添加 Syzygy 留言'}
+                : '+ 添加甘棠留言'}
           </button>
         </div>
         {isEditorOpen ? (
@@ -3702,7 +3702,7 @@ function BookDetailPage() {
             onClick={() => setIsDiscussionOpen((value) => !value)}
           >
             <span className="discussion-collapse-title">
-              With Syzygy
+              与甘棠共读
               <span className="discussion-collapse-count">
                 {displayDiscussions.length} 条
               </span>
@@ -4084,8 +4084,8 @@ function BookDetailPage() {
                   }
                 >
                   {isAskingSyzygy || isStreamingReply
-                    ? 'Syzygy 思考中...'
-                    : '让 Syzygy 回复'}
+                    ? '甘棠思考中...'
+                    : '问问甘棠'}
                 </button>
               </div>
             </div>

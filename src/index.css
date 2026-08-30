@@ -325,6 +325,9 @@ textarea {
 }
 
 .header-masthead-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
@@ -357,11 +360,58 @@ textarea {
 }
 
 .title {
-  margin: 0.25rem 0 0;
+  margin: 0.12rem 0 0;
   font-size: 1.5rem;
   font-family: 'Playfair Display', 'Noto Serif SC', 'Songti SC', serif;
   font-style: italic;
   font-weight: 700;
+  letter-spacing: 0.015em;
+}
+
+.title-kicker,
+.title-subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+}
+
+.title-kicker {
+  font-size: 0.56rem;
+  letter-spacing: 0.24em;
+}
+
+.title-subtitle {
+  margin-top: 0.18rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+}
+
+.companion-console-trigger {
+  width: 100%;
+  min-height: 48px;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--color-bg-card) 76%, transparent);
+  color: var(--color-text-primary);
+  font-family: 'Playfair Display', 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.companion-console-trigger:hover {
+  background: color-mix(in srgb, var(--color-accent-primary) 12%, var(--color-bg-card));
+  color: var(--color-accent-hover);
+}
+
+[data-theme='retro-cafe'] .companion-console-trigger {
+  border-bottom-color: rgba(135, 150, 122, 0.62);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 253, 248, 0.2),
+    rgba(255, 253, 248, 0.76) 50%,
+    rgba(255, 253, 248, 0.2)
+  );
 }
 
 .eyebrow {
@@ -3560,7 +3610,16 @@ textarea {
   }
 
   .title {
-    font-size: 1.25rem;
+    font-size: 1.18rem;
+  }
+
+  .title-kicker {
+    font-size: 0.5rem;
+  }
+
+  .title-subtitle {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
   }
 
   .card {

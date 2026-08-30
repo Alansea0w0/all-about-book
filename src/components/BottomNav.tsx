@@ -115,13 +115,13 @@ function BottomNav({
       <button
         type="button"
         className="bottom-nav-item"
-        aria-label="Syzygy Console"
+        aria-label="甘棠小屋"
         onClick={onOpenConsole}
       >
         <span className="bottom-nav-icon">
           <ConsoleIcon />
         </span>
-        <span className="bottom-nav-label">控制台</span>
+        <span className="bottom-nav-label">甘棠</span>
       </button>
       <button
         type="button"

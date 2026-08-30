@@ -383,7 +383,7 @@ const statusLabels: Record<Book['status'], string> = {
 
 const discussionRoleLabels: Record<DiscussionMessage['role'], string> = {
   me: '我',
-  syzygy: 'Syzygy',
+  syzygy: '甘棠',
 }
 
 const formatExcerptDate = (value: string): string => {
@@ -428,7 +428,7 @@ export const buildMarkdownArchive = (
   options?: { summarizeCheckIns?: boolean },
 ): string => {
   const summarizeCheckIns = options?.summarizeCheckIns ?? false
-  const lines: string[] = ['# All About Book · 书摘归档', '']
+  const lines: string[] = ['# All About Our Books · 书摘归档', '']
 
   books.forEach((book) => {
     lines.push(`## 《${book.title || '未命名'}》 - ${book.author || '作者未知'}`)
@@ -636,7 +636,7 @@ export const buildHtmlArchive = (
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>All About Book · 书摘归档</title>
+<title>All About Our Books · 书摘归档</title>
 <style>
   body {
     font-family: "Noto Serif SC", "Songti SC", serif;
@@ -698,7 +698,7 @@ export const buildHtmlArchive = (
 </head>
 <body>
   <div class="page">
-    <h1>All About Book · 书摘归档</h1>
+    <h1>All About Our Books · 书摘归档</h1>
     ${sections || '<p>暂无数据</p>'}
   </div>
 </body>
