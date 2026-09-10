@@ -353,6 +353,7 @@ function BookDetailPage() {
   const [confirmingDeleteAnswer, setConfirmingDeleteAnswer] =
     useState<BookAnswer | null>(null)
   const [cloudError, setCloudError] = useState<string | null>(null)
+  const [discussionError, setDiscussionError] = useState<string | null>(null)
   const [isAskingSyzygy, setIsAskingSyzygy] = useState(false)
   const [isSendingDiscussion, setIsSendingDiscussion] = useState(false)
   const [attachContext, setAttachContext] = useState(true)
@@ -1313,29 +1314,29 @@ function BookDetailPage() {
   ) => {
     event.preventDefault()
     if (isSendingDiscussion || isAskingSyzygy || isStreamingReply) {
-      setCloudError('请等待当前操作完成。')
+      setDiscussionError('请等待当前操作完成。')
       return
     }
     if (!book?.id) {
-      setCloudError('无法发送讨论：缺少书籍 ID。')
+      setDiscussionError('无法发送讨论：缺少书籍 ID。')
       return
     }
     const content = newMessageContent.trim()
     if (!content) {
-      setCloudError('请先输入内容再发送。')
+      setDiscussionError('请先输入内容再发送。')
       return
     }
     const conversationId = await ensureActiveConversation()
     if (!conversationId) {
-      setCloudError('无法发送讨论：缺少对话信息。')
+      setDiscussionError('无法发送讨论：缺少对话信息。')
       return
     }
     if (isCloudMode) {
       if (!session?.user) {
-        setCloudError('请先登录后再同步云端讨论。')
+        setDiscussionError('请先登录后再同步云端讨论。')
         return
       }
-      setCloudError(null)
+      setDiscussionError(null)
       setIsSendingDiscussion(true)
       try {
         await createCloudDiscussion(
@@ -1348,7 +1349,7 @@ function BookDetailPage() {
         setNewMessageContent('')
       } catch (error) {
         console.error(error)
-        setCloudError('云端讨论发送失败，请稍后重试。')
+        setDiscussionError('云端讨论发送失败，请稍后重试。')
       } finally {
         setIsSendingDiscussion(false)
       }
@@ -1369,29 +1370,35 @@ function BookDetailPage() {
     refreshDiscussions()
   }
 
-  const addOptimisticDiscussionPair = (content: string) => {
+  const addOptimisticDiscussionPair = (
+    content: string,
+    includeUserMessage = true,
+  ) => {
     if (!book || !activeConversationId) return null
-    const userClientId = crypto.randomUUID()
+    const userClientId = includeUserMessage ? crypto.randomUUID() : null
     const assistantClientId = crypto.randomUUID()
-    setOptimisticMessages((messages) => [
-      ...messages,
-      {
-        clientId: userClientId,
-        bookId: book.id,
-        conversationId: activeConversationId,
-        role: 'me',
-        content,
-        isPending: true,
-      },
-      {
+    setOptimisticMessages((messages) => {
+      const nextMessages: OptimisticDiscussionMessage[] = []
+      if (userClientId) {
+        nextMessages.push({
+          clientId: userClientId,
+          bookId: book.id,
+          conversationId: activeConversationId,
+          role: 'me',
+          content,
+          isPending: true,
+        })
+      }
+      nextMessages.push({
         clientId: assistantClientId,
         bookId: book.id,
         conversationId: activeConversationId,
         role: 'syzygy',
         content: '',
         isPending: true,
-      },
-    ])
+      })
+      return [...messages, ...nextMessages]
+    })
     return { userClientId, assistantClientId }
   }
 
@@ -1409,13 +1416,14 @@ function BookDetailPage() {
   }
 
   const clearOptimisticPair = (clientIds: {
-    userClientId: string
+    userClientId: string | null
     assistantClientId: string
   }) => {
     setOptimisticMessages((messages) =>
       messages.filter(
         (message) =>
-          message.clientId !== clientIds.userClientId &&
+          (!clientIds.userClientId ||
+            message.clientId !== clientIds.userClientId) &&
           message.clientId !== clientIds.assistantClientId,
       ),
     )
@@ -1423,46 +1431,56 @@ function BookDetailPage() {
 
   const handleAskSyzygy = async () => {
     if (isSendingDiscussion || isAskingSyzygy || isStreamingReply) {
-      setCloudError('请等待当前操作完成。')
+      setDiscussionError('请等待当前操作完成。')
       return
     }
     if (!book?.id) {
-      setCloudError('无法发送讨论：缺少书籍 ID。')
+      setDiscussionError('无法发送讨论：缺少书籍 ID。')
       return
     }
-    const content = newMessageContent.trim()
+    const draftContent = newMessageContent.trim()
+    const latestDiscussion =
+      displayDiscussions[displayDiscussions.length - 1]
+    const isReplyingToLastSentMessage =
+      !draftContent &&
+      latestDiscussion?.role === 'me' &&
+      !('isPending' in latestDiscussion && latestDiscussion.isPending) &&
+      Boolean(latestDiscussion.content.trim())
+    const content = isReplyingToLastSentMessage
+      ? '请回应当前对话中最后一条来自小安的已发送消息。'
+      : draftContent
     if (!content) {
-      setCloudError('请先输入内容再让甘棠回复。')
+      setDiscussionError('请先输入内容，或先发送一条等待回应的消息。')
       return
     }
     if (!isCloudMode) {
-      setCloudError('请先切换到云端模式后再问问甘棠。')
+      setDiscussionError('请先切换到云端模式后再问问甘棠。')
       return
     }
     if (!session?.user || !supabase) {
-      setCloudError('请先登录后再让甘棠回复。')
+      setDiscussionError('请先登录后再让甘棠回复。')
       return
     }
     if (!supabaseAnonKey) {
-      setCloudError('Supabase 配置缺失，请稍后再试。')
+      setDiscussionError('Supabase 配置缺失，请稍后再试。')
       return
     }
-    setCloudError(null)
+    setDiscussionError(null)
     setIsAskingSyzygy(true)
     let optimisticIds: {
-      userClientId: string
+      userClientId: string | null
       assistantClientId: string
     } | null = null
     const conversationId = await ensureActiveConversation()
     if (!conversationId) {
-      setCloudError('无法发送讨论：缺少对话信息。')
+      setDiscussionError('无法发送讨论：缺少对话信息。')
       setIsAskingSyzygy(false)
       return
     }
     try {
       const accessToken = session.access_token
       if (!accessToken) {
-        setCloudError('请先登录后再让甘棠回复。')
+        setDiscussionError('请先登录后再让甘棠回复。')
         setIsAskingSyzygy(false)
         return
       }
@@ -1471,12 +1489,17 @@ function BookDetailPage() {
         const suffix = supabaseAnonKey.slice(-4)
         console.debug(`Supabase anon key: ${prefix}...${suffix}`)
       }
-      optimisticIds = addOptimisticDiscussionPair(content)
+      optimisticIds = addOptimisticDiscussionPair(
+        draftContent,
+        !isReplyingToLastSentMessage,
+      )
       if (!optimisticIds) {
         setIsAskingSyzygy(false)
         return
       }
-      setNewMessageContent('')
+      if (!isReplyingToLastSentMessage) {
+        setNewMessageContent('')
+      }
       if (isStreamEnabled) {
         if (!supabaseUrl) {
           throw new Error('Supabase configuration is missing.')
@@ -1494,7 +1517,9 @@ function BookDetailPage() {
             userMessage: content,
             bookId: book.id,
             conversationId,
-            attachContext,
+            attachContext: isReplyingToLastSentMessage
+              ? true
+              : attachContext,
             stream: true,
           }),
         })
@@ -1573,17 +1598,28 @@ function BookDetailPage() {
           session.user.id,
           book.id,
           conversationId,
-          [
-            { role: 'me', content },
-            {
-              role: 'syzygy',
-              content: finalReply,
-              metadata: {
-                model: finalModel,
-                temperature: finalTemperature,
-              },
-            },
-          ],
+          isReplyingToLastSentMessage
+            ? [
+                {
+                  role: 'syzygy',
+                  content: finalReply,
+                  metadata: {
+                    model: finalModel,
+                    temperature: finalTemperature,
+                  },
+                },
+              ]
+            : [
+                { role: 'me', content: draftContent },
+                {
+                  role: 'syzygy',
+                  content: finalReply,
+                  metadata: {
+                    model: finalModel,
+                    temperature: finalTemperature,
+                  },
+                },
+              ],
         )
         await loadCloudDiscussions(book.id, conversationId)
         clearOptimisticPair(optimisticIds)
@@ -1597,7 +1633,9 @@ function BookDetailPage() {
             userMessage: content,
             bookId: book.id,
             conversationId,
-            attachContext,
+            attachContext: isReplyingToLastSentMessage
+              ? true
+              : attachContext,
           },
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -1618,17 +1656,28 @@ function BookDetailPage() {
         session.user.id,
         book.id,
         conversationId,
-        [
-          { role: 'me', content },
-          {
-            role: 'syzygy',
-            content: data.assistantReply,
-            metadata: {
-              model: data.usedModel,
-              temperature: data.usedTemperature,
-            },
-          },
-        ],
+        isReplyingToLastSentMessage
+          ? [
+              {
+                role: 'syzygy',
+                content: data.assistantReply,
+                metadata: {
+                  model: data.usedModel,
+                  temperature: data.usedTemperature,
+                },
+              },
+            ]
+          : [
+              { role: 'me', content: draftContent },
+              {
+                role: 'syzygy',
+                content: data.assistantReply,
+                metadata: {
+                  model: data.usedModel,
+                  temperature: data.usedTemperature,
+                },
+              },
+            ],
       )
       await loadCloudDiscussions(book.id, conversationId)
       clearOptimisticPair(optimisticIds)
@@ -1645,10 +1694,10 @@ function BookDetailPage() {
           ? (error as { status?: number }).status
           : undefined
       if (status === 401 || status === 403) {
-        setCloudError('请先登录后再让甘棠回复。')
+        setDiscussionError('请先登录后再让甘棠回复。')
         return
       }
-      setCloudError('甘棠回复失败，请稍后再试。')
+      setDiscussionError('甘棠回复失败，请稍后再试。')
     } finally {
       setIsAskingSyzygy(false)
       setIsStreamingReply(false)
@@ -4002,6 +4051,17 @@ function BookDetailPage() {
               />
               <span>流式输出</span>
             </label>
+            {discussionError ? (
+              <p className="notice error" role="alert">
+                {discussionError}
+              </p>
+            ) : !newMessageContent.trim() &&
+              displayDiscussions[displayDiscussions.length - 1]?.role ===
+                'me' ? (
+              <p className="muted">
+                输入框为空时，“问问甘棠”会接着回应上一条消息。
+              </p>
+            ) : null}
             <div className="discussion-form-footer">
               {canSwitchModel ? (
                 <div className="discussion-model">
