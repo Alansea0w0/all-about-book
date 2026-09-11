@@ -28,6 +28,17 @@ const log = (message) => {
 const sleep = (milliseconds) =>
   new Promise((resolve) => setTimeout(resolve, milliseconds))
 
+const verifyMailboxAccess = async () => {
+  const { error } = await supabase
+    .from('codex_requests')
+    .select('id')
+    .limit(1)
+  if (error) {
+    log('Mailbox authentication failed. Check the saved Supabase Secret key.')
+    process.exit(1)
+  }
+}
+
 const selectOrThrow = async (promise) => {
   const { data, error } = await promise
   if (error) throw error
@@ -225,7 +236,8 @@ process.on('SIGTERM', () => {
   stopping = true
 })
 
-log('Gantang mail carrier is ready.')
+await verifyMailboxAccess()
+log('Gantang mail carrier is ready and mailbox access is verified.')
 while (!stopping) {
   try {
     const request = await claimNextRequest()
@@ -237,4 +249,3 @@ while (!stopping) {
   }
 }
 log('Gantang mail carrier stopped.')
-

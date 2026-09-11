@@ -1768,8 +1768,21 @@ function BookDetailPage() {
         typeof (error as { status?: unknown }).status === 'number'
           ? (error as { status?: number }).status
           : undefined
-      if (status === 401 || status === 403) {
-        setDiscussionError('请先登录后再让甘棠回复。')
+      const errorMessage =
+        error instanceof Error
+          ? error.message.toLowerCase()
+          : typeof error === 'object' &&
+              error !== null &&
+              'message' in error &&
+              typeof (error as { message?: unknown }).message === 'string'
+            ? (error as { message: string }).message.toLowerCase()
+            : ''
+      if (
+        status === 401 ||
+        status === 403 ||
+        /jwt|session|auth|expired/.test(errorMessage)
+      ) {
+        setDiscussionError('登录状态已过期，请重新登录后再让甘棠回复。')
         return
       }
       setDiscussionError('甘棠回复失败，请稍后再试。')
