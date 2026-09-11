@@ -4129,7 +4129,7 @@ function BookDetailPage() {
               </label>
             ) : (
               <p className="muted local-reply-hint">
-                本地甘棠会在电脑上的取信员运行时回信；手机也可以投递。
+                你可以从手机或任何设备写信；家中电脑在线时会立即回复，离线时会等它上线。
               </p>
             )}
             {discussionError ? (
@@ -4159,7 +4159,7 @@ function BookDetailPage() {
                   }}
                   disabled={isDiscussionActionLoading}
                 >
-                  <option value="codex">共读甘棠（本地）</option>
+                  <option value="codex">共读甘棠（由家中电脑回复）</option>
                   <option value="openrouter">备用模型（云端）</option>
                 </select>
               </label>
