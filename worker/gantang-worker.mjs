@@ -28,13 +28,17 @@ const log = (message) => {
 const sleep = (milliseconds) =>
   new Promise((resolve) => setTimeout(resolve, milliseconds))
 
-const verifyMailboxAccess = async () => {
-  const { error } = await supabase
-    .from('codex_requests')
-    .select('id')
-    .limit(1)
-  if (error) {
-    log('Mailbox authentication failed. Check the saved Supabase Secret key.')
+const verifyWorkerAccess = async () => {
+  const probes = await Promise.all([
+    supabase.from('codex_requests').select('id').limit(1),
+    supabase.from('books').select('id').limit(1),
+    supabase.from('excerpts').select('id').limit(1),
+    supabase.from('book_questions').select('id').limit(1),
+    supabase.from('check_ins').select('id').limit(1),
+    supabase.from('discussions').select('id').limit(1),
+  ])
+  if (probes.some(({ error }) => error)) {
+    log('Worker access check failed. Check the saved key and minimum grants.')
     process.exit(1)
   }
 }
@@ -159,6 +163,13 @@ const safeFailureCode = (error) => {
   return 'worker_error'
 }
 
+const safeDiagnostic = (error) =>
+  String(error?.message ?? error)
+    .replace(/sb_secret_[A-Za-z0-9._-]+/g, '[redacted secret]')
+    .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
+    .replace(/\s+/g, ' ')
+    .slice(0, 500)
+
 const finishRequest = async (request, reply) => {
   const responseId = randomUUID()
   const { error: insertError } = await supabase.from('discussions').insert({
@@ -205,7 +216,9 @@ const failRequest = async (request, error) => {
     })
     .eq('id', request.id)
     .eq('status', 'processing')
-  log(`Request ${request.id} stopped with ${errorCode}.`)
+  log(
+    `Request ${request.id} stopped with ${errorCode}: ${safeDiagnostic(error)}`,
+  )
 }
 
 const processRequest = async (request) => {
@@ -236,8 +249,8 @@ process.on('SIGTERM', () => {
   stopping = true
 })
 
-await verifyMailboxAccess()
-log('Gantang mail carrier is ready and mailbox access is verified.')
+await verifyWorkerAccess()
+log('Gantang mail carrier is ready and minimum access is verified.')
 while (!stopping) {
   try {
     const request = await claimNextRequest()

@@ -51,6 +51,16 @@ grant insert (
 ) on table public.codex_requests to authenticated;
 grant all on table public.codex_requests to service_role;
 
+-- The local co-reading worker only needs to read context and append its reply.
+grant select on table
+  public.books,
+  public.excerpts,
+  public.book_questions,
+  public.check_ins,
+  public.discussions
+to service_role;
+grant insert on table public.discussions to service_role;
+
 create policy "Users can read their own Codex requests"
   on public.codex_requests
   for select

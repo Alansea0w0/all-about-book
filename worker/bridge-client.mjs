@@ -80,7 +80,10 @@ export class BridgeSession {
       throw new Error(`${name} returned no text content`)
     }
     const parsed = JSON.parse(text)
-    if (result.isError) throw new Error(`${name} failed`)
+    if (result.isError) {
+      const detail = String(parsed?.error ?? 'failed').slice(0, 1_000)
+      throw new Error(`${name}: ${detail}`)
+    }
     return parsed
   }
 
