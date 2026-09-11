@@ -5,6 +5,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$Host.UI.RawUI.WindowTitle = 'Gantang Mail Carrier Setup'
+Add-Type -AssemblyName System.Security
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $downloadsRoot = Split-Path -Parent $repoRoot
 $bridgeEntry = Join-Path $downloadsRoot 'Local-Codex-Bridge\dist\src\index.js'
@@ -22,7 +24,25 @@ $secureKey = Read-Host -AsSecureString
 if ($secureKey.Length -lt 20) {
   throw 'No valid key was entered.'
 }
-$secureKey | ConvertFrom-SecureString | Set-Content -LiteralPath $secretPath -Encoding utf8
+$pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
+$plainBytes = $null
+$protectedBytes = $null
+try {
+  $plainKey = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+  $plainBytes = [Text.Encoding]::UTF8.GetBytes($plainKey)
+  $protectedBytes = [Security.Cryptography.ProtectedData]::Protect(
+    $plainBytes,
+    $null,
+    [Security.Cryptography.DataProtectionScope]::CurrentUser
+  )
+  [IO.File]::WriteAllBytes($secretPath, $protectedBytes)
+} finally {
+  [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
+  if ($plainBytes) { [Array]::Clear($plainBytes, 0, $plainBytes.Length) }
+  if ($protectedBytes) { [Array]::Clear($protectedBytes, 0, $protectedBytes.Length) }
+  $plainKey = $null
+  $secureKey = $null
+}
 
 $config = [ordered]@{
   projectUrl = $ProjectUrl

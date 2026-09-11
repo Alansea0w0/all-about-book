@@ -1,4 +1,6 @@
 $ErrorActionPreference = 'Stop'
+$Host.UI.RawUI.WindowTitle = 'Gantang Mail Carrier'
+Add-Type -AssemblyName System.Security
 $configRoot = Join-Path $env:LOCALAPPDATA 'AllAboutBookGantang'
 $configPath = Join-Path $configRoot 'worker-config.json'
 if (-not (Test-Path -LiteralPath $configPath)) {
@@ -6,12 +8,15 @@ if (-not (Test-Path -LiteralPath $configPath)) {
 }
 
 $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
-$encryptedKey = Get-Content -LiteralPath $config.secretPath -Raw
-$secureKey = ConvertTo-SecureString $encryptedKey
-$pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
+$protectedBytes = [IO.File]::ReadAllBytes($config.secretPath)
+$plainBytes = [Security.Cryptography.ProtectedData]::Unprotect(
+  $protectedBytes,
+  $null,
+  [Security.Cryptography.DataProtectionScope]::CurrentUser
+)
 
 try {
-  $plainKey = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+  $plainKey = [Text.Encoding]::UTF8.GetString($plainBytes)
   $env:GANTANG_SUPABASE_URL = $config.projectUrl
   $env:GANTANG_SUPABASE_SERVICE_ROLE_KEY = $plainKey
   $env:GANTANG_CODEX_THREAD_ID = $config.threadId
@@ -19,7 +24,8 @@ try {
   $env:GANTANG_BRIDGE_ENTRY = $config.bridgeEntry
   node (Join-Path $PSScriptRoot 'gantang-worker.mjs')
 } finally {
-  [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
+  [Array]::Clear($plainBytes, 0, $plainBytes.Length)
+  [Array]::Clear($protectedBytes, 0, $protectedBytes.Length)
   Remove-Item Env:GANTANG_SUPABASE_URL -ErrorAction SilentlyContinue
   Remove-Item Env:GANTANG_SUPABASE_SERVICE_ROLE_KEY -ErrorAction SilentlyContinue
   Remove-Item Env:GANTANG_CODEX_THREAD_ID -ErrorAction SilentlyContinue
