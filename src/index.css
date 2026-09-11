@@ -1158,6 +1158,20 @@ textarea {
   flex-wrap: wrap;
 }
 
+.discussion-reply-provider {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.discussion-reply-provider select {
+  min-width: 180px;
+}
+
+.local-reply-hint {
+  margin: 0;
+}
+
 .discussion-form-footer {
   display: flex;
   align-items: center;

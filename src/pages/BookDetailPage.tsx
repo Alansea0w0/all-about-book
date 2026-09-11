@@ -100,6 +100,10 @@ import {
   supabaseAnonKey,
   supabaseUrl,
 } from '../lib/supabaseClient'
+import {
+  createCodexRequest,
+  waitForCodexRequest,
+} from '../lib/codexRequests'
 
 const statusLabels = {
   unread: '未读',
@@ -128,6 +132,8 @@ type OptimisticDiscussionMessage = {
 }
 
 type DiscussionEntry = DiscussionMessage | OptimisticDiscussionMessage
+
+type ReplyProvider = 'codex' | 'openrouter'
 
 // 导读/总结表单里「自定义写入端」在下拉框中的哨兵值
 const CUSTOM_WRITER_VALUE = '__custom__'
@@ -354,6 +360,9 @@ function BookDetailPage() {
     useState<BookAnswer | null>(null)
   const [cloudError, setCloudError] = useState<string | null>(null)
   const [discussionError, setDiscussionError] = useState<string | null>(null)
+  const [discussionNotice, setDiscussionNotice] = useState<string | null>(
+    null,
+  )
   const [isAskingSyzygy, setIsAskingSyzygy] = useState(false)
   const [isSendingDiscussion, setIsSendingDiscussion] = useState(false)
   const [attachContext, setAttachContext] = useState(true)
@@ -369,6 +378,8 @@ function BookDetailPage() {
   const [isConversationListOpen, setIsConversationListOpen] =
     useState(false)
   const [isStreamEnabled, setIsStreamEnabled] = useState(false)
+  const [replyProvider, setReplyProvider] =
+    useState<ReplyProvider>('codex')
   const [optimisticMessages, setOptimisticMessages] = useState<
     OptimisticDiscussionMessage[]
   >([])
@@ -1337,6 +1348,7 @@ function BookDetailPage() {
         return
       }
       setDiscussionError(null)
+      setDiscussionNotice(null)
       setIsSendingDiscussion(true)
       try {
         await createCloudDiscussion(
@@ -1466,6 +1478,7 @@ function BookDetailPage() {
       return
     }
     setDiscussionError(null)
+    setDiscussionNotice(null)
     setIsAskingSyzygy(true)
     let optimisticIds: {
       userClientId: string | null
@@ -1478,6 +1491,68 @@ function BookDetailPage() {
       return
     }
     try {
+      if (replyProvider === 'codex') {
+        let userMessageId: string | undefined
+        if (isReplyingToLastSentMessage) {
+          userMessageId = latestDiscussion?.id
+        } else {
+          userMessageId = await createCloudDiscussion(
+            session.user.id,
+            book.id,
+            conversationId,
+            draftContent,
+          )
+          setNewMessageContent('')
+          await loadCloudDiscussions(book.id, conversationId)
+        }
+
+        optimisticIds = addOptimisticDiscussionPair('', false)
+        if (!optimisticIds) return
+        updateOptimisticAssistant(
+          optimisticIds.assistantClientId,
+          '信已送到共读甘棠的小屋，等我一会儿呀……',
+        )
+
+        const request = await createCodexRequest({
+          userId: session.user.id,
+          bookId: book.id,
+          conversationId,
+          userMessageId,
+          content: isReplyingToLastSentMessage
+            ? latestDiscussion.content
+            : draftContent,
+          attachContext: isReplyingToLastSentMessage ? true : attachContext,
+        })
+        const finished = await waitForCodexRequest(
+          session.user.id,
+          request.id,
+        )
+
+        if (finished.status === 'completed') {
+          await loadCloudDiscussions(book.id, conversationId)
+          clearOptimisticPair(optimisticIds)
+          setDiscussionNotice('甘棠已经回信啦。')
+          return
+        }
+
+        clearOptimisticPair(optimisticIds)
+        if (
+          finished.status === 'queued' ||
+          finished.status === 'processing'
+        ) {
+          setDiscussionNotice(
+            '信已经留在小屋里；电脑上的取信员上线后，甘棠会继续回复。',
+          )
+          return
+        }
+        if (finished.status === 'needs_attention') {
+          setDiscussionError('这封信需要回到电脑前确认一下，请稍后再试。')
+          return
+        }
+        setDiscussionError('这封信暂时没有送达，请稍后再试。')
+        return
+      }
+
       const accessToken = session.access_token
       if (!accessToken) {
         setDiscussionError('请先登录后再让甘棠回复。')
@@ -4041,19 +4116,29 @@ function BookDetailPage() {
               />
               <span>附带阅读上下文</span>
             </label>
-            <label className="field checkbox-field">
-              <input
-                type="checkbox"
-                checked={isStreamEnabled}
-                onChange={(event) =>
-                  setIsStreamEnabled(event.target.checked)
-                }
-              />
-              <span>流式输出</span>
-            </label>
+            {replyProvider === 'openrouter' ? (
+              <label className="field checkbox-field">
+                <input
+                  type="checkbox"
+                  checked={isStreamEnabled}
+                  onChange={(event) =>
+                    setIsStreamEnabled(event.target.checked)
+                  }
+                />
+                <span>流式输出</span>
+              </label>
+            ) : (
+              <p className="muted local-reply-hint">
+                本地甘棠会在电脑上的取信员运行时回信；手机也可以投递。
+              </p>
+            )}
             {discussionError ? (
               <p className="notice error" role="alert">
                 {discussionError}
+              </p>
+            ) : discussionNotice ? (
+              <p className="notice success" role="status">
+                {discussionNotice}
               </p>
             ) : !newMessageContent.trim() &&
               displayDiscussions[displayDiscussions.length - 1]?.role ===
@@ -4063,7 +4148,22 @@ function BookDetailPage() {
               </p>
             ) : null}
             <div className="discussion-form-footer">
-              {canSwitchModel ? (
+              <label className="discussion-reply-provider">
+                <span className="muted">回复方式</span>
+                <select
+                  value={replyProvider}
+                  onChange={(event) => {
+                    setReplyProvider(event.target.value as ReplyProvider)
+                    setDiscussionError(null)
+                    setDiscussionNotice(null)
+                  }}
+                  disabled={isDiscussionActionLoading}
+                >
+                  <option value="codex">共读甘棠（本地）</option>
+                  <option value="openrouter">备用模型（云端）</option>
+                </select>
+              </label>
+              {replyProvider === 'openrouter' && canSwitchModel ? (
                 <div className="discussion-model">
                   <span className="muted">Model</span>
                   <div className="menu">

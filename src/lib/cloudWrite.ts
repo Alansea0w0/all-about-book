@@ -349,13 +349,14 @@ export const createCloudDiscussion = async (
   bookId: string,
   conversationId: string,
   content: string,
-): Promise<void> => {
+): Promise<string> => {
   const client = ensureClient()
   if (!bookId) {
     throw new Error('Missing bookId for discussion insert.')
   }
+  const id = crypto.randomUUID()
   const { error } = await client.from('discussions').insert({
-    id: crypto.randomUUID(),
+    id,
     user_id: userId,
     book_id: bookId,
     conversation_id: conversationId,
@@ -366,6 +367,7 @@ export const createCloudDiscussion = async (
   if (error) {
     throw error
   }
+  return id
 }
 
 export const createCloudDiscussionMessages = async (
