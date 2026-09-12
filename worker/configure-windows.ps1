@@ -1,17 +1,14 @@
 param(
-  [string]$ThreadId = '01a08fd9-145a-7882-8ce4-64280bd67c67',
   [string]$ProjectUrl = 'https://acigficxrwlsgofrhqmk.supabase.co',
-  [string]$CodexCwd = 'D:\Alansea\kindle'
+  [string]$CodexCwd = 'D:\Alansea\kindle',
+  [string]$AppServerUrl = 'ws://127.0.0.1:8766'
 )
 
 $ErrorActionPreference = 'Stop'
 $Host.UI.RawUI.WindowTitle = 'Gantang Mail Carrier Setup'
 Add-Type -AssemblyName System.Security
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$downloadsRoot = Split-Path -Parent $repoRoot
-$bridgeEntry = Join-Path $downloadsRoot 'Local-Codex-Bridge\dist\src\index.js'
-if (-not (Test-Path -LiteralPath $bridgeEntry)) {
-  throw "Local Codex Bridge was not found: $bridgeEntry"
+if ($AppServerUrl -ne 'ws://127.0.0.1:8766') {
+  throw 'Only the dedicated loopback app-server URL ws://127.0.0.1:8766 is allowed.'
 }
 
 $configRoot = Join-Path $env:LOCALAPPDATA 'AllAboutBookGantang'
@@ -45,13 +42,21 @@ try {
 }
 
 $config = [ordered]@{
+  version = 2
   projectUrl = $ProjectUrl
-  threadId = $ThreadId
+  threadId = $null
+  readyThreadId = $null
+  observerReadyThreadId = $null
   codexCwd = $CodexCwd
-  bridgeEntry = $bridgeEntry
+  appServerUrl = $AppServerUrl
   secretPath = $secretPath
 }
-$config | ConvertTo-Json | Set-Content -LiteralPath $configPath -Encoding utf8
+[IO.File]::WriteAllText(
+  $configPath,
+  ($config | ConvertTo-Json),
+  [Text.UTF8Encoding]::new($false)
+)
 Write-Host ''
 Write-Host 'Setup complete. The key is encrypted for this Windows account.'
+Write-Host 'The dedicated co-reading task will be created on the first start.'
 Write-Host "Configuration: $configPath"
